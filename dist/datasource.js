@@ -78,7 +78,8 @@ System.register(["angular", "lodash", "app/core/utils/datemath", "app/core/utils
                     key: "getMetrics",
                     value: function getMetrics() {
                         var _this = this;
-                        return this.fetchToken(_this).then(function (_this) {
+
+                        return this.fetchToken().then(function () {
                             return _this.backendSrv.datasourceRequest({
                                 url: _this.tsURL + '/v1/tags',
                                 data: '',
@@ -97,8 +98,9 @@ System.register(["angular", "lodash", "app/core/utils/datemath", "app/core/utils
                 }, {
                     key: "getAttributesForMetric",
                     value: function getAttributesForMetric(metricName) {
-                        var _this = this;
-                        return this.fetchToken(_this).then(function (_this) {
+                        var _this2 = this;
+
+                        return this.fetchToken().then(function () {
                             var query = {
                                 "start": "1d-ago",
                                 "end": "1s-ago",
@@ -106,26 +108,27 @@ System.register(["angular", "lodash", "app/core/utils/datemath", "app/core/utils
                                     "name": [metricName]
                                 }]
                             };
-                            return _this.backendSrv.datasourceRequest({
-                                url: _this.tsURL + '/v1/datapoints',
+                            return _this2.backendSrv.datasourceRequest({
+                                url: _this2.tsURL + '/v1/datapoints',
                                 data: JSON.stringify(query),
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    'Authorization': 'Bearer ' + _this.uaaTokenCache.uaacToken,
-                                    'Predix-Zone-Id': _this.predixZoneId,
-                                    'Access-Control-Allow-Origin': _this.uaac_origin
+                                    'Authorization': 'Bearer ' + _this2.uaaTokenCache.uaacToken,
+                                    'Predix-Zone-Id': _this2.predixZoneId,
+                                    'Access-Control-Allow-Origin': _this2.uaac_origin
                                 }
                             }).then(function (result) {
-                                return _this.mapToTextValue(Object.keys(result.data.tags[0].results[0].attributes));
+                                return _this2.mapToTextValue(Object.keys(result.data.tags[0].results[0].attributes));
                             });
                         });
                     }
                 }, {
                     key: "getAttributeValues",
                     value: function getAttributeValues(metricName, attributeName) {
-                        var _this = this;
-                        return this.fetchToken(_this).then(function (_this) {
+                        var _this3 = this;
+
+                        return this.fetchToken().then(function () {
                             var query = {
                                 "start": "1d-ago",
                                 "end": "1s-ago",
@@ -133,35 +136,36 @@ System.register(["angular", "lodash", "app/core/utils/datemath", "app/core/utils
                                     "name": [metricName]
                                 }]
                             };
-                            return _this.backendSrv.datasourceRequest({
-                                url: _this.tsURL + '/v1/datapoints',
+                            return _this3.backendSrv.datasourceRequest({
+                                url: _this3.tsURL + '/v1/datapoints',
                                 data: JSON.stringify(query),
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    'Authorization': 'Bearer ' + _this.uaaTokenCache.uaacToken,
-                                    'Predix-Zone-Id': _this.predixZoneId,
-                                    'Access-Control-Allow-Origin': _this.uaac_origin
+                                    'Authorization': 'Bearer ' + _this3.uaaTokenCache.uaacToken,
+                                    'Predix-Zone-Id': _this3.predixZoneId,
+                                    'Access-Control-Allow-Origin': _this3.uaac_origin
                                 }
                             }).then(function (result) {
-                                return _this.mapToTextValue(result.data.tags[0].results[0].attributes[attributeName]);
+                                return _this3.mapToTextValue(result.data.tags[0].results[0].attributes[attributeName]);
                             });
                         });
                     }
                 }, {
                     key: "getAggregations",
                     value: function getAggregations() {
-                        var _this = this;
-                        return this.fetchToken(_this).then(function (_this) {
-                            return _this.backendSrv.datasourceRequest({
-                                url: _this.tsURL + '/v1/aggregations',
+                        var _this4 = this;
+
+                        return this.fetchToken().then(function () {
+                            return _this4.backendSrv.datasourceRequest({
+                                url: _this4.tsURL + '/v1/aggregations',
                                 data: '',
                                 method: 'GET',
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    'Authorization': 'Bearer ' + _this.uaaTokenCache.uaacToken,
-                                    'Predix-Zone-Id': _this.predixZoneId,
-                                    'Access-Control-Allow-Origin': _this.uaac_origin
+                                    'Authorization': 'Bearer ' + _this4.uaaTokenCache.uaacToken,
+                                    'Predix-Zone-Id': _this4.predixZoneId,
+                                    'Access-Control-Allow-Origin': _this4.uaac_origin
                                 }
                             }).then(function (response) {
                                 var data = [];
@@ -171,7 +175,7 @@ System.register(["angular", "lodash", "app/core/utils/datemath", "app/core/utils
                                         type: elem.name
                                     });
                                 });
-                                return _this.mapToTextAndType(data);
+                                return _this4.mapToTextAndType(data);
                             });
                         });
                     }
@@ -247,64 +251,68 @@ System.register(["angular", "lodash", "app/core/utils/datemath", "app/core/utils
                     }
                 }, {
                     key: "getUAAToken",
-                    value: function getUAAToken(_this) {
-                        return new Promise(function (resolve, reject) {
+                    value: function getUAAToken() {
+                        var _this5 = this;
+
+                        return this.q(function (resolve, reject) {
                             var now = new Date();
                             var checkTime = new Date(now.getTime() + 1000 * 30);
-                            if (typeof _this.uaaTokenCache.uaacTokenType === 'undefined' || typeof _this.uaaTokenCache.expiresDTTM !== 'undefined' && _this.uaaTokenCache.expiresDTTM < checkTime) {
-                                var clientID = _this.clientData.split(":")[0];
-                                var clientSecret = _this.clientData.split(":")[1];
+                            if (typeof _this5.uaaTokenCache.uaacTokenType === 'undefined' || typeof _this5.uaaTokenCache.expiresDTTM !== 'undefined' && _this5.uaaTokenCache.expiresDTTM < checkTime) {
+                                var clientID = _this5.clientData.split(":")[0];
+                                var clientSecret = _this5.clientData.split(":")[1];
                                 var payload = encodeURI("client_id=" + clientID + "&client_secret=" + clientSecret + "&response_type=token&grant_type=client_credentials");
-                                _this.backendSrv.datasourceRequest({
+                                _this5.backendSrv.datasourceRequest({
                                     method: 'POST',
-                                    url: _this.uaacURL,
+                                    url: _this5.uaacURL,
                                     headers: {
                                         'Content-Type': 'application/x-www-form-urlencoded',
-                                        'Authorization': 'Basic ' + btoa(_this.clientData)
+                                        'Authorization': 'Basic ' + btoa(_this5.clientData)
                                     },
                                     data: payload
                                 }).then(function (response) {
-                                    _this.uaaTokenCache = [];
-                                    _this.uaaTokenCache.uaacToken = response.data.access_token;
-                                    _this.uaaTokenCache.uaacTokenType = response.data.token_type;
-                                    _this.uaaTokenCache.uaacExpires = response.data.expires_in;
+                                    _this5.uaaTokenCache = [];
+                                    _this5.uaaTokenCache.uaacToken = response.data.access_token;
+                                    _this5.uaaTokenCache.uaacTokenType = response.data.token_type;
+                                    _this5.uaaTokenCache.uaacExpires = response.data.expires_in;
                                     var timeObject = new Date();
                                     //set the time and date that this token expires
                                     timeObject = new Date(timeObject.getTime() + 1000 * response.data.expires_in);
-                                    _this.uaaTokenCache.expiresDTTM = timeObject;
+                                    _this5.uaaTokenCache.expiresDTTM = timeObject;
                                     // console.log("Got a new token!");
                                     // console.log($scope.datasource.uaaTokenCache);
-                                    resolve(_this.uaaTokenCache);
+                                    resolve(_this5.uaaTokenCache);
                                 }, function (error) {
                                     console.log("Failed to get a token: " + error);
                                     resolve("error");
                                 });
                             } else {
                                 // console.log("we have a good token...");
-                                resolve(_this.uaaTokenCache);
+                                resolve(_this5.uaaTokenCache);
                             }
                         });
                     }
                 }, {
                     key: "fetchToken",
-                    value: function fetchToken(_this) {
+                    value: function fetchToken() {
+                        var _this6 = this;
+
                         // TODO: check if we already have a token and the expiration time is good
-                        return new Promise(function (resolve, reject) {
-                            var aToken = _this.getUAAToken(_this);
+                        return this.q(function (resolve, reject) {
+                            var aToken = _this6.getUAAToken();
                             aToken.then(function (response) {
-                                resolve(_this);
+                                resolve();
                             });
                         });
                     }
                 }, {
                     key: "MultiplePredixTimeSeriesQueries",
                     value: function MultiplePredixTimeSeriesQueries(pendingQueries) {
+                        var _this7 = this;
+
                         var deferred = this.q.defer();
                         var predixTSCalls = [];
-                        // have to reference "this" inside angular foreach
-                        var _this = this;
                         angular.forEach(pendingQueries, function (aQuery) {
-                            predixTSCalls.push(_this.SinglePredixTimeSeriesQuery(aQuery));
+                            predixTSCalls.push(_this7.SinglePredixTimeSeriesQuery(aQuery));
                         });
                         this.q.all(predixTSCalls).then(function (results) {
                             var response = {
@@ -324,6 +332,8 @@ System.register(["angular", "lodash", "app/core/utils/datemath", "app/core/utils
                 }, {
                     key: "query",
                     value: function query(options) {
+                        var _this8 = this;
+
                         // not needed since we are using suggest vs value?
                         // it isn't used anyways..
                         //var query = this.buildQueryParameters(options);
@@ -390,8 +400,7 @@ System.register(["angular", "lodash", "app/core/utils/datemath", "app/core/utils
                                 console.log("hidden or empty, not adding to query");
                             }
                         });
-                        // Iterate over each target and get the data from TimeSeries
-                        var _this = this;
+
                         // Check if there are any metrics to query (they can all be hidden, or none at all)
                         if (queries.length === 0) {
                             // console.log("no tags visible or specified, no data to fetch");
@@ -400,9 +409,9 @@ System.register(["angular", "lodash", "app/core/utils/datemath", "app/core/utils
                             });
                             return deferred.promise;
                         }
-                        this.fetchToken(this).then(function (_this) {
-                            var predixQueries = _this.q.all({
-                                first: _this.MultiplePredixTimeSeriesQueries(queries)
+                        this.fetchToken().then(function () {
+                            var predixQueries = _this8.q.all({
+                                first: _this8.MultiplePredixTimeSeriesQueries(queries)
                             });
                             predixQueries.then(function (results) {
                                 // return results from predix query
@@ -414,16 +423,17 @@ System.register(["angular", "lodash", "app/core/utils/datemath", "app/core/utils
                 }, {
                     key: "testDatasource",
                     value: function testDatasource() {
-                        var _this = this;
-                        return this.fetchToken(_this).then(function (_this) {
-                            return _this.backendSrv.datasourceRequest({
-                                url: _this.tsURL + '/v1/tags',
+                        var _this9 = this;
+
+                        return this.fetchToken().then(function () {
+                            return _this9.backendSrv.datasourceRequest({
+                                url: _this9.tsURL + '/v1/tags',
                                 method: 'GET',
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    'Authorization': _this.uaaTokenCache.uaacToken,
-                                    'Predix-Zone-Id': _this.predixZoneId,
-                                    'Access-Control-Allow-Origin': _this.uaac_origin
+                                    'Authorization': _this9.uaaTokenCache.uaacToken,
+                                    'Predix-Zone-Id': _this9.predixZoneId,
+                                    'Access-Control-Allow-Origin': _this9.uaac_origin
                                 }
                             }).then(function (response) {
                                 console.log(response);

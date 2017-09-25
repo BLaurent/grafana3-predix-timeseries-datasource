@@ -29,27 +29,26 @@ export class PredixTimeSeriesDatasource {
 
     // Required for hints
     getMetrics() {
-        var _this = this;
-        return this.fetchToken(_this).then(function(_this) {
-            return _this.backendSrv.datasourceRequest({
-                url: _this.tsURL + '/v1/tags',
+        return this.fetchToken().then(() => {
+            return this.backendSrv.datasourceRequest({
+                url: this.tsURL + '/v1/tags',
                 data: '',
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + _this.uaaTokenCache.uaacToken,
-                    'Predix-Zone-Id': _this.predixZoneId,
-                    'Access-Control-Allow-Origin': _this.uaac_origin
+                    'Authorization': 'Bearer ' + this.uaaTokenCache.uaacToken,
+                    'Predix-Zone-Id': this.predixZoneId,
+                    'Access-Control-Allow-Origin': this.uaac_origin
                 }
-            }).then(function(response) {
-                return _this.mapToTextValue(response.data.results);
+            }).then((response) => {
+                return this.mapToTextValue(response.data.results);
             });
         });
     }
 
     getAttributesForMetric(metricName) {
-        var _this = this;
-        return this.fetchToken(_this).then(function(_this) {
+
+        return this.fetchToken().then(() => {
             var query = {
                 "start": "1d-ago",
                 "end": "1s-ago",
@@ -57,25 +56,24 @@ export class PredixTimeSeriesDatasource {
                     "name": [metricName]
                 }]
             };
-            return _this.backendSrv.datasourceRequest({
-                url: _this.tsURL + '/v1/datapoints',
+            return this.backendSrv.datasourceRequest({
+                url: this.tsURL + '/v1/datapoints',
                 data: JSON.stringify(query),
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + _this.uaaTokenCache.uaacToken,
-                    'Predix-Zone-Id': _this.predixZoneId,
-                    'Access-Control-Allow-Origin': _this.uaac_origin
+                    'Authorization': 'Bearer ' + this.uaaTokenCache.uaacToken,
+                    'Predix-Zone-Id': this.predixZoneId,
+                    'Access-Control-Allow-Origin': this.uaac_origin
                 }
-            }).then(function(result) {
-                return _this.mapToTextValue(Object.keys(result.data.tags[0].results[0].attributes));
+            }).then((result) => {
+                return this.mapToTextValue(Object.keys(result.data.tags[0].results[0].attributes));
             });
         });
     }
 
     getAttributeValues(metricName, attributeName) {
-        var _this = this;
-        return this.fetchToken(_this).then(function(_this) {
+        return this.fetchToken().then(() => {
             var query = {
                 "start": "1d-ago",
                 "end": "1s-ago",
@@ -83,44 +81,43 @@ export class PredixTimeSeriesDatasource {
                     "name": [metricName]
                 }]
             };
-            return _this.backendSrv.datasourceRequest({
-                url: _this.tsURL + '/v1/datapoints',
+            return this.backendSrv.datasourceRequest({
+                url: this.tsURL + '/v1/datapoints',
                 data: JSON.stringify(query),
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + _this.uaaTokenCache.uaacToken,
-                    'Predix-Zone-Id': _this.predixZoneId,
-                    'Access-Control-Allow-Origin': _this.uaac_origin
+                    'Authorization': 'Bearer ' + this.uaaTokenCache.uaacToken,
+                    'Predix-Zone-Id': this.predixZoneId,
+                    'Access-Control-Allow-Origin': this.uaac_origin
                 }
-            }).then(function(result) {
-                return _this.mapToTextValue(result.data.tags[0].results[0].attributes[attributeName]);
+            }).then((result) => {
+                return this.mapToTextValue(result.data.tags[0].results[0].attributes[attributeName]);
             });
         });
     }
 
     getAggregations() {
-        var _this = this;
-        return this.fetchToken(_this).then(function(_this) {
-            return _this.backendSrv.datasourceRequest({
-                url: _this.tsURL + '/v1/aggregations',
+        return this.fetchToken().then(() => {
+            return this.backendSrv.datasourceRequest({
+                url: this.tsURL + '/v1/aggregations',
                 data: '',
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + _this.uaaTokenCache.uaacToken,
-                    'Predix-Zone-Id': _this.predixZoneId,
-                    'Access-Control-Allow-Origin': _this.uaac_origin
+                    'Authorization': 'Bearer ' + this.uaaTokenCache.uaacToken,
+                    'Predix-Zone-Id': this.predixZoneId,
+                    'Access-Control-Allow-Origin': this.uaac_origin
                 }
-            }).then(function(response) {
+            }).then((response) => {
                 var data = [];
-                _.each(response.data.results, function(elem) {
+                _.each(response.data.results, (elem) => {
                     data.push({
                         name: elem.type,
                         type: elem.name
                     });
                 });
-                return _this.mapToTextAndType(data);
+                return this.mapToTextAndType(data);
             });
         });
     }
@@ -135,7 +132,7 @@ export class PredixTimeSeriesDatasource {
     }
 
     mapToTextAndType(result) {
-        return _.map(result, function(d, i) {
+        return _.map(result, function (d, i) {
             return {
                 text: d.name,
                 expandable: false,
@@ -146,7 +143,7 @@ export class PredixTimeSeriesDatasource {
 
     buildQueryParameters(options) {
         //remove placeholder targets
-        options.targets = _.filter(options.targets, function(target) {
+        options.targets = _.filter(options.targets, function (target) {
             return target.target !== 'select metric';
         });
         return options;
@@ -157,95 +154,97 @@ export class PredixTimeSeriesDatasource {
     SinglePredixTimeSeriesQuery(aQuery) {
         var deferred = this.q.defer();
         var request = this.backendSrv.datasourceRequest({
-                url: this.tsURL + '/v1/datapoints',
-                data: JSON.stringify(aQuery.fullQuery),
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + this.uaaTokenCache.uaacToken,
-                    'Predix-Zone-Id': this.predixZoneId,
-                    'Access-Control-Allow-Origin': this.uaac_origin
-                }
-            }).then(function(result) {
-                // we always get one tag back
-                var tag = result.data.tags[0];
-                var tagName = tag.name;
-                if ((typeof aQuery.targetAlias !== 'undefined') && (aQuery.targetAlias.length > 0)) {
-                    tagName = aQuery.targetAlias;
-                }
-                // construct the response
-                var a_metric = {
-                    target: tagName,
-                    datapoints: []
-                };
-                // add in the datapoints, picking the correct fields
-                // predix has a "quality" field that is ignored
-                _.each(tag.results[0].values, function(timeseries) {
-                    var newseries = [timeseries[1], timeseries[0]];
-                    a_metric.datapoints.push(newseries);
-                });
-                return a_metric;
-            })
-            .then(function(response) {
+            url: this.tsURL + '/v1/datapoints',
+            data: JSON.stringify(aQuery.fullQuery),
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + this.uaaTokenCache.uaacToken,
+                'Predix-Zone-Id': this.predixZoneId,
+                'Access-Control-Allow-Origin': this.uaac_origin
+            }
+        }).then(function (result) {
+            // we always get one tag back
+            var tag = result.data.tags[0];
+            var tagName = tag.name;
+            if ((typeof aQuery.targetAlias !== 'undefined') && (aQuery.targetAlias.length > 0)) {
+                tagName = aQuery.targetAlias;
+            }
+            // construct the response
+            var a_metric = {
+                target: tagName,
+                datapoints: []
+            };
+            // add in the datapoints, picking the correct fields
+            // predix has a "quality" field that is ignored
+            _.each(tag.results[0].values, function (timeseries) {
+                var newseries = [timeseries[1], timeseries[0]];
+                a_metric.datapoints.push(newseries);
+            });
+            return a_metric;
+        })
+            .then(function (response) {
                 deferred.resolve(response);
-            }, function(error) {
+            }, function (error) {
                 console.error(error);
             });
         return deferred.promise;
     }
 
 
-    getUAAToken(_this) {
-        return new Promise(function(resolve, reject) {
+    getUAAToken() {
+        return this.q((resolve, reject) => {
             var now = new Date();
             var checkTime = new Date(now.getTime() + 1000 * 30);
-            if (typeof _this.uaaTokenCache.uaacTokenType === 'undefined' ||
-                (typeof _this.uaaTokenCache.expiresDTTM !== 'undefined' &&
-                    _this.uaaTokenCache.expiresDTTM < checkTime)) {
-                var clientID = _this.clientData.split(":")[0];
-                var clientSecret = _this.clientData.split(":")[1];
+            if (typeof this.uaaTokenCache.uaacTokenType === 'undefined' ||
+                (typeof this.uaaTokenCache.expiresDTTM !== 'undefined' &&
+                    this.uaaTokenCache.expiresDTTM < checkTime)) {
+                var clientID = this.clientData.split(":")[0];
+                var clientSecret = this.clientData.split(":")[1];
                 var payload = encodeURI("client_id=" + clientID +
                     "&client_secret=" + clientSecret +
                     "&response_type=token&grant_type=client_credentials");
-                _this.backendSrv.datasourceRequest({
+                this.backendSrv.datasourceRequest({
                     method: 'POST',
-                    url: _this.uaacURL,
+                    url: this.uaacURL,
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        'Authorization': 'Basic ' + btoa(_this.clientData),
+                        'Authorization': 'Basic ' + btoa(this.clientData),
                     },
                     data: payload
                 }).then(
-                    function(response) {
-                        _this.uaaTokenCache = [];
-                        _this.uaaTokenCache.uaacToken = response.data.access_token;
-                        _this.uaaTokenCache.uaacTokenType = response.data.token_type;
-                        _this.uaaTokenCache.uaacExpires = response.data.expires_in;
+                    (response) => {
+                        this.uaaTokenCache = [];
+                        this.uaaTokenCache.uaacToken = response.data.access_token;
+                        this.uaaTokenCache.uaacTokenType = response.data.token_type;
+                        this.uaaTokenCache.uaacExpires = response.data.expires_in;
                         var timeObject = new Date();
                         //set the time and date that this token expires
                         timeObject = new Date(timeObject.getTime() + 1000 * response.data.expires_in);
-                        _this.uaaTokenCache.expiresDTTM = timeObject;
+                        this.uaaTokenCache.expiresDTTM = timeObject;
                         // console.log("Got a new token!");
                         // console.log($scope.datasource.uaaTokenCache);
-                        resolve(_this.uaaTokenCache);
+                        resolve(this.uaaTokenCache);
                     },
-                    function(error) {
+                    (error) => {
                         console.log("Failed to get a token: " + error);
                         resolve("error");
                     });
             } else {
                 // console.log("we have a good token...");
-                resolve(_this.uaaTokenCache);
+                resolve(this.uaaTokenCache);
             }
         });
     }
 
-    fetchToken(_this) {
+    fetchToken() {
+
+
         // TODO: check if we already have a token and the expiration time is good
-        return new Promise(function(resolve, reject) {
-            var aToken = _this.getUAAToken(_this);
-            aToken.then(function(response) {
-                resolve(_this);
+        return this.q((resolve, reject) => {
+            var aToken = this.getUAAToken();
+            aToken.then((response) => {
+                resolve();
             });
         });
     }
@@ -253,28 +252,26 @@ export class PredixTimeSeriesDatasource {
     MultiplePredixTimeSeriesQueries(pendingQueries) {
         var deferred = this.q.defer();
         var predixTSCalls = [];
-        // have to reference "this" inside angular foreach
-        var _this = this;
-        angular.forEach(pendingQueries, function(aQuery) {
-            predixTSCalls.push(_this.SinglePredixTimeSeriesQuery(aQuery));
+        angular.forEach(pendingQueries, (aQuery) => {
+            predixTSCalls.push(this.SinglePredixTimeSeriesQuery(aQuery));
         });
         this.q.all(predixTSCalls)
             .then(
-                function(results) {
-                    var response = {
-                        data: []
-                    };
-                    angular.forEach(results, function(result) {
-                        response.data.push(result);
-                    });
-                    deferred.resolve(response);
-                },
-                function(errors) {
-                    deferred.reject(errors);
-                },
-                function(updates) {
-                    deferred.update(updates);
-                }
+            (results) => {
+                var response = {
+                    data: []
+                };
+                angular.forEach(results, (result) => {
+                    response.data.push(result);
+                });
+                deferred.resolve(response);
+            },
+            (errors) => {
+                deferred.reject(errors);
+            },
+            (updates) => {
+                deferred.update(updates);
+            }
             );
         return deferred.promise;
     }
@@ -300,7 +297,7 @@ export class PredixTimeSeriesDatasource {
         var deferred = this.q.defer();
 
         // Iterate over each target and build our query, store inside
-        angular.forEach(options.targets, function(target) {
+        angular.forEach(options.targets, function (target) {
             // there's no "next" option in here, so test and skip
             if ((!target.hide) && (typeof target.metric !== 'undefined')) {
                 // placeholder while query is built
@@ -319,7 +316,7 @@ export class PredixTimeSeriesDatasource {
                 if (typeof target.attributes !== undefined) {
                     // there are filters defined, loop through them
                     var attributes = {};
-                    angular.forEach(target.attributes, function(attribute) {
+                    angular.forEach(target.attributes, function (attribute) {
                         var name = attribute.name;
                         var value = attribute.value;
                         // if the value is empty, skip it
@@ -347,8 +344,7 @@ export class PredixTimeSeriesDatasource {
                 console.log("hidden or empty, not adding to query");
             }
         });
-        // Iterate over each target and get the data from TimeSeries
-        var _this = this;
+
         // Check if there are any metrics to query (they can all be hidden, or none at all)
         if (queries.length === 0) {
             // console.log("no tags visible or specified, no data to fetch");
@@ -357,11 +353,11 @@ export class PredixTimeSeriesDatasource {
             });
             return deferred.promise;
         }
-        this.fetchToken(this).then(function(_this) {
-            var predixQueries = _this.q.all({
-                first: _this.MultiplePredixTimeSeriesQueries(queries),
+        this.fetchToken().then(() => {
+            var predixQueries = this.q.all({
+                first: this.MultiplePredixTimeSeriesQueries(queries),
             });
-            predixQueries.then(function(results) {
+            predixQueries.then((results) => {
                 // return results from predix query
                 deferred.resolve(results.first);
             });
@@ -370,18 +366,17 @@ export class PredixTimeSeriesDatasource {
     }
 
     testDatasource() {
-        var _this = this;
-        return this.fetchToken(_this).then(function(_this) {
-            return _this.backendSrv.datasourceRequest({
-                url: _this.tsURL + '/v1/tags',
+        return this.fetchToken().then(() => {
+            return this.backendSrv.datasourceRequest({
+                url: this.tsURL + '/v1/tags',
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': _this.uaaTokenCache.uaacToken,
-                    'Predix-Zone-Id': _this.predixZoneId,
-                    'Access-Control-Allow-Origin': _this.uaac_origin
+                    'Authorization': this.uaaTokenCache.uaacToken,
+                    'Predix-Zone-Id': this.predixZoneId,
+                    'Access-Control-Allow-Origin': this.uaac_origin
                 }
-            }).then(function(response) {
+            }).then((response) => {
                 console.log(response);
                 if (response.status === 200) {
                     return {
