@@ -1,5 +1,3 @@
-FROM grafana/grafana:4.5.2
+FROM grafana/grafana:4.4.3
 
-RUN mkdir /var/lib/grafana/plugins/grafana-timeseries-datasource && \
-      cp dist/* /var/lib/grafana/plugins/grafana-timeseries-datasource
-
+COPY dist/ /var/lib/grafana/plugins/grafana-datasource-predix-timeseries/
